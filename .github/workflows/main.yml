@@ -2,7 +2,7 @@ name: Trading Signal Scanner
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Berjalan otomatis setiap 15 menit
+    - cron: '* * * * *' # Berjalan otomatis setiap 1 menit
   workflow_dispatch:      # Tombol jalankan manual
 
 jobs:
@@ -31,5 +31,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json
-          git commit -m "Update trading data" || exit 0
+          git commit -m "Update Scalping Data M1" || exit 0
           git push
