@@ -3,76 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Signal Dashboard</title>
+    <title>BTC Scalping Dashboard (M1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; }
-        .card { background: #1e293b; border-radius: 1rem; padding: 1.5rem; border: 1px solid #334155; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
+        .card { background: #1e293b; border-radius: 1rem; padding: 1.5rem; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body class="p-4 flex flex-col items-center min-h-screen">
 
-    <h1 class="text-2xl font-bold mb-6 text-blue-400">Bitcoin Signal (1H)</h1>
+    <h1 class="text-2xl font-bold mb-6 text-blue-400 tracking-tighter">BTC SCALPER M1</h1>
 
     <div class="card w-full max-w-md text-center mb-6">
-        <div id="price" class="text-4xl font-black text-green-400 mb-2">Memuat...</div>
-        <div class="text-gray-400 text-sm uppercase tracking-widest mb-4">Indikator RSI: <span id="rsi" class="text-white font-bold">--</span></div>
+        <div id="price" class="text-5xl font-black text-green-400 mb-2 font-mono">$0.00</div>
+        <div class="text-gray-400 text-sm uppercase tracking-widest mb-4">RSI (14): <span id="rsi" class="text-white font-bold">--</span></div>
         
         <div id="status-box" class="p-4 rounded-lg bg-slate-800 border border-slate-700">
-            <span class="text-xs text-gray-400 block mb-1">SINYAL SAAT INI</span>
-            <div id="signal" class="text-xl font-bold text-yellow-500">Menghubungkan...</div>
+            <span class="text-xs text-gray-400 block mb-1 uppercase font-bold">Signal Result</span>
+            <div id="signal" class="text-xl font-bold text-yellow-500 italic">CONNECTING...</div>
         </div>
         
-        <div id="update" class="text-[10px] text-gray-500 mt-4 italic">Update Terakhir: --</div>
+        <div id="update" class="text-[10px] text-gray-500 mt-4 italic">Updated: --</div>
     </div>
 
-    <div class="card w-full max-w-4xl h-[400px] overflow-hidden p-0">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-            <div id="tradingview_chart" style="height:calc(100% - 32px);width:100%"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-            <script type="text/javascript">
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "60",
-                "timezone": "Asia/Jakarta",
-                "theme": "dark",
-                "style": "1",
-                "locale": "id",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": false,
-                "allow_symbol_change": true,
-                "container_id": "tradingview_chart"
-            });
-            </script>
-        </div>
+    <div class="card w-full max-w-4xl h-[450px] overflow-hidden p-0">
+        <div id="tradingview_chart" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "BINANCE:BTCUSDT",
+            "interval": "1",
+            "timezone": "Asia/Jakarta",
+            "theme": "dark",
+            "style": "1",
+            "locale": "id",
+            "enable_publishing": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_chart"
+        });
+        </script>
     </div>
 
     <script>
         async function updateDashboard() {
             try {
-                // Menambahkan timestamp agar browser tidak mengambil data lama (cache)
                 const response = await fetch('data.json?t=' + new Date().getTime());
                 const data = await response.json();
                 
                 document.getElementById('price').innerText = "$" + data.price;
                 document.getElementById('rsi').innerText = data.rsi;
                 document.getElementById('signal').innerText = data.signal;
-                document.getElementById('update').innerText = "Update Terakhir: " + data.last_update;
+                document.getElementById('update').innerText = "Last Update: " + data.last_update;
 
-                // Warna Sinyal Dinamis
                 const sigBox = document.getElementById('signal');
-                if (data.signal.includes('BUY')) sigBox.className = "text-xl font-bold text-green-500";
-                else if (data.signal.includes('SELL')) sigBox.className = "text-xl font-bold text-red-500";
-                else sigBox.className = "text-xl font-bold text-yellow-500";
-
-            } catch (e) {
-                console.log("Menunggu data diperbarui...");
-            }
+                if (data.signal.includes('BUY')) {
+                    sigBox.className = "text-xl font-bold text-green-500 blink";
+                } else if (data.signal.includes('SELL')) {
+                    sigBox.className = "text-xl font-bold text-red-500 blink";
+                } else {
+                    sigBox.className = "text-xl font-bold text-yellow-500";
+                }
+            } catch (e) { console.log("Updating data..."); }
         }
         updateDashboard();
-        setInterval(updateDashboard, 30000); // Cek data tiap 30 detik
+        setInterval(updateDashboard, 15000); // Refresh data di web tiap 15 detik
     </script>
 </body>
 </html>
