@@ -2,8 +2,8 @@ name: Trading Signal Scanner
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Berjalan otomatis setiap 15 menit
-  workflow_dispatch: # Memungkinkan Anda menjalankan manual
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
