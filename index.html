@@ -3,66 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC RSI Dashboard</title>
+    <title>BTC Signal Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #131722; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
-        .card { background: #1e222d; padding: 30px; border-radius: 20px; border-top: 6px solid #2962ff; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        h1 { color: #d1d4dc; font-size: 1.5em; }
-        #price { font-size: 3em; font-weight: bold; color: #00ff00; margin: 15px 0; }
-        .info-row { display: flex; justify-content: space-around; margin: 20px 0; border-top: 1px solid #363c4e; padding-top: 20px; }
-        .info-item { flex: 1; }
-        .label { font-size: 0.8em; color: #848e9c; text-transform: uppercase; }
-        .value { font-size: 1.2em; font-weight: bold; color: #ffaa00; }
-        #status { font-size: 1.4em; font-weight: bold; margin-top: 20px; padding: 10px; border-radius: 10px; background: #2a2e39; }
-        #update { font-size: 0.7em; color: #5d6673; margin-top: 25px; }
+        body { background-color: #0f172a; color: white; }
+        .card { background: #1e293b; border-radius: 1rem; padding: 1.5rem; border: 1px solid #334155; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="card">
-            <h1>Bitcoin Signal (1H)</h1>
-            <div id="price">...</div>
-            
-            <div class="info-row">
-                <div class="info-item">
-                    <div class="label">Indikator RSI</div>
-                    <div id="rsi-val" class="value">--</div>
-                </div>
-            </div>
+<body class="p-4 flex flex-col items-center min-h-screen">
 
-            <div id="status">Menganalisa...</div>
-            <div id="update"></div>
+    <h1 class="text-2xl font-bold mb-6 text-blue-400">Bitcoin Signal (1H)</h1>
+
+    <div class="card w-full max-w-md text-center mb-6">
+        <div id="price" class="text-4xl font-black text-green-400 mb-2">Memuat...</div>
+        <div class="text-gray-400 text-sm uppercase tracking-widest mb-4">Indikator RSI: <span id="rsi" class="text-white font-bold">--</span></div>
+        
+        <div id="status-box" class="p-4 rounded-lg bg-slate-800 border border-slate-700">
+            <span class="text-xs text-gray-400 block mb-1">SINYAL SAAT INI</span>
+            <div id="signal" class="text-xl font-bold text-yellow-500">Menghubungkan...</div>
         </div>
         
-        <br>
-        <div id="tradingview_chart"></div>
+        <div id="update" class="text-[10px] text-gray-500 mt-4 italic">Update Terakhir: --</div>
+    </div>
+
+    <div class="card w-full max-w-4xl h-[400px] overflow-hidden p-0">
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+            <div id="tradingview_chart" style="height:calc(100% - 32px);width:100%"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+            <script type="text/javascript">
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "BINANCE:BTCUSDT",
+                "interval": "60",
+                "timezone": "Asia/Jakarta",
+                "theme": "dark",
+                "style": "1",
+                "locale": "id",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_chart"
+            });
+            </script>
+        </div>
     </div>
 
     <script>
-        async function fetchSignal() {
+        async function updateDashboard() {
             try {
-                const res = await fetch('data.json?t=' + Date.now());
-                const data = await res.json();
+                // Menambahkan timestamp agar browser tidak mengambil data lama (cache)
+                const response = await fetch('data.json?t=' + new Date().getTime());
+                const data = await response.json();
                 
                 document.getElementById('price').innerText = "$" + data.price;
-                document.getElementById('rsi-val').innerText = data.rsi;
-                document.getElementById('status').innerText = data.signal;
+                document.getElementById('rsi').innerText = data.rsi;
+                document.getElementById('signal').innerText = data.signal;
                 document.getElementById('update').innerText = "Update Terakhir: " + data.last_update;
 
-                // Warna Sinyal
-                const statusBox = document.getElementById('status');
-                if (data.signal.includes("BUY")) statusBox.style.color = "#00ff00";
-                else if (data.signal.includes("SELL")) statusBox.style.color = "#ff4444";
-                else statusBox.style.color = "#ffaa00";
+                // Warna Sinyal Dinamis
+                const sigBox = document.getElementById('signal');
+                if (data.signal.includes('BUY')) sigBox.className = "text-xl font-bold text-green-500";
+                else if (data.signal.includes('SELL')) sigBox.className = "text-xl font-bold text-red-500";
+                else sigBox.className = "text-xl font-bold text-yellow-500";
 
             } catch (e) {
-                console.log("Menunggu data...");
+                console.log("Menunggu data diperbarui...");
             }
         }
-
-        setInterval(fetchSignal, 5000);
-        fetchSignal();
+        updateDashboard();
+        setInterval(updateDashboard, 30000); // Cek data tiap 30 detik
     </script>
 </body>
 </html>
