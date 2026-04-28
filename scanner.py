@@ -47,7 +47,7 @@ if prices:
     rsi_val = calculate_rsi(prices)
     
     signal = "WAITING"
-    if rsi_val <= 30:
+    if rsi_val <= 60:
         signal = "🔥 BUY (M1)"
         send_telegram(f"🚀 BTC M1 BUY\nHarga: ${current_price}\nRSI: {rsi_val}")
     elif rsi_val >= 70:
