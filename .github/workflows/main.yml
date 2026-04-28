@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/set-adult@v4
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
@@ -22,7 +22,6 @@ jobs:
 
       - name: Run scanner
         env:
-          # Ini menghubungkan Python dengan Brankas Secrets GitHub
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scanner.py
