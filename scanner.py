@@ -1,34 +1,41 @@
 import requests
 import json
+import datetime
 
-# 1. Ambil data harga dari Binance
 def get_price():
-    url = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
-    response = requests.get(url)
-    data = response.json()
-    return float(data['price'])
+    try:
+        # Mengambil harga BTC terbaru dari Binance
+        url = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
+        response = requests.get(url)
+        data = response.json()
+        return float(data['price'])
+    except:
+        return 0.0
 
-# 2. Logika Sinyal Sederhana (Contoh: Dummy Logic)
-# Nanti kita bisa ganti dengan RSI, EMA, atau strategi DCA Anda
 def generate_signal(price):
-    if price < 60000: # Contoh logika sederhana
-        return "BUY"
+    # Contoh Logika: Jika harga di bawah 65000 BUY, di atas 80000 SELL
+    # Anda bisa merubah angka ini nanti sesuai strategi Anda
+    if price > 0 and price < 65000:
+        return '<span style="color: #00ff00;">BUY</span>'
     elif price > 80000:
-        return "SELL"
+        return '<span style="color: #ff0000;">SELL</span>'
     else:
-        return "WAITING"
+        return '<span style="color: #ffaa00;">WAITING / NEUTRAL</span>'
 
-# 3. Simpan hasil ke file JSON agar bisa dibaca oleh Website
+# Eksekusi program
 price = get_price()
 signal = generate_signal(price)
+waktu = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+# Format data untuk ditampilkan di website
 status = {
-    "price": price,
+    "price": f"{price:,.2f}",
     "signal": signal,
-    "last_update": "Terakhir diperbarui: Real-time dari Python"
+    "last_update": waktu
 }
 
+# Menyimpan hasil ke file data.json
 with open('data.json', 'w') as f:
     json.dump(status, f)
 
-print(f"Berhasil! Harga: {price}, Sinyal: {signal}")
+print(f"Update Berhasil: {price} - {signal}")
