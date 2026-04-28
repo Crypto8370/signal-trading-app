@@ -3,65 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Sinyal RSI</title>
+    <title>BTC RSI Dashboard</title>
     <style>
-        body { font-family: sans-serif; background-color: #131722; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        .signal-box { background: #1e222d; padding: 25px; border-radius: 15px; border-top: 5px solid #2962ff; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #price { font-size: 2.5em; font-weight: bold; color: #00ff00; margin: 10px 0; }
-        #rsi-val { font-size: 1.2em; color: #ffaa00; margin-bottom: 10px; }
-        #status { font-size: 1.5em; font-weight: bold; padding: 10px; border-radius: 8px; background: #2a2e39; display: inline-block; }
-        #update { font-size: 0.8em; color: gray; margin-top: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #131722; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: #1e222d; padding: 30px; border-radius: 20px; border-top: 6px solid #2962ff; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        h1 { color: #d1d4dc; font-size: 1.5em; }
+        #price { font-size: 3em; font-weight: bold; color: #00ff00; margin: 15px 0; }
+        .info-row { display: flex; justify-content: space-around; margin: 20px 0; border-top: 1px solid #363c4e; padding-top: 20px; }
+        .info-item { flex: 1; }
+        .label { font-size: 0.8em; color: #848e9c; text-transform: uppercase; }
+        .value { font-size: 1.2em; font-weight: bold; color: #ffaa00; }
+        #status { font-size: 1.4em; font-weight: bold; margin-top: 20px; padding: 10px; border-radius: 10px; background: #2a2e39; }
+        #update { font-size: 0.7em; color: #5d6673; margin-top: 25px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>BTC Signal Tracker (RSI)</h1>
-        
-        <div class="signal-box">
-            <div id="price">Memuat Harga...</div>
-            <div id="rsi-val">RSI: --</div>
-            <div id="status">Memindai Sinyal...</div>
+        <div class="card">
+            <h1>Bitcoin Signal (1H)</h1>
+            <div id="price">...</div>
+            
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="label">Indikator RSI</div>
+                    <div id="rsi-val" class="value">--</div>
+                </div>
+            </div>
+
+            <div id="status">Menganalisa...</div>
             <div id="update"></div>
         </div>
-
+        
+        <br>
         <div id="tradingview_chart"></div>
     </div>
 
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // Inisialisasi Chart
-        new TradingView.widget({
-            "width": "100%", "height": 400, "symbol": "BINANCE:BTCUSDT",
-            "interval": "60", "theme": "dark", "container_id": "tradingview_chart"
-        });
-
-        // Fungsi Update Data
-        async function updateDashboard() {
+        async function fetchSignal() {
             try {
-                const response = await fetch('data.json?t=' + new Date().getTime());
-                const data = await response.json();
+                const res = await fetch('data.json?t=' + Date.now());
+                const data = await res.json();
                 
                 document.getElementById('price').innerText = "$" + data.price;
-                document.getElementById('rsi-val').innerText = "Indikator RSI: " + data.rsi;
-                document.getElementById('status').innerText = "Sinyal: " + data.signal;
-                document.getElementById('update').innerText = "Terakhir Update: " + data.last_update;
-                
-                // Ubah warna harga berdasarkan sinyal
-                if(data.signal.includes("BUY")) {
-                    document.getElementById('status').style.color = "#00ff00";
-                } else if(data.signal.includes("SELL")) {
-                    document.getElementById('status').style.color = "#ff4444";
-                } else {
-                    document.getElementById('status').style.color = "#ffaa00";
-                }
+                document.getElementById('rsi-val').innerText = data.rsi;
+                document.getElementById('status').innerText = data.signal;
+                document.getElementById('update').innerText = "Update Terakhir: " + data.last_update;
+
+                // Warna Sinyal
+                const statusBox = document.getElementById('status');
+                if (data.signal.includes("BUY")) statusBox.style.color = "#00ff00";
+                else if (data.signal.includes("SELL")) statusBox.style.color = "#ff4444";
+                else statusBox.style.color = "#ffaa00";
+
             } catch (e) {
-                console.log("Menunggu robot memperbarui data.json...");
+                console.log("Menunggu data...");
             }
         }
 
-        setInterval(updateDashboard, 10000);
-        updateDashboard();
+        setInterval(fetchSignal, 5000);
+        fetchSignal();
     </script>
 </body>
 </html>
